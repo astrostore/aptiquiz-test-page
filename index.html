@@ -1,1 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AptiQuiz - Online Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
+        .status-not-visited { background-color: #cbd5e1; color: #4b5563; }
+        .status-not-answered { background-color: #ef4444; color: #ffffff; }
+        .status-answered { background-color: #10b981; color: #ffffff; }
+        .status-marked-for-review { background-color: #6366f1; color: #ffffff; }
+        .status-answered-marked-for-review { background-color: #a855f7; color: #ffffff; }
+        .btn-green { background-color: #22c55e; }
+        .btn-green:hover { background-color: #16a34a; }
+        .btn-blue { background-color: #3b82f6; }
+        .btn-blue:hover { background-color: #2563eb; }
+        .btn-orange { background-color: #f97316; }
+        .btn-orange:hover { background-color: #ea580c; }
+        .btn-indigo { background-color: #6366f1; }
+        .btn-indigo:hover { background-color: #4f46e5; }
+        .btn-gray { background-color: #6b7280; }
+        .btn-gray:hover { background-color: #4b5563; }
+        .scrollable-palette::-webkit-scrollbar { width: 8px; }
+        .scrollable-palette::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .scrollable-palette::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .scrollable-palette::-webkit-scrollbar-thumb:hover { background: #555; }
+        .aptiquiz-gradient { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+    <div class="container mx-auto bg-white rounded-xl shadow-lg min-h-screen flex flex-col">
+        <!-- Header Section -->
+        <header class="flex flex-col sm:flex-row items-center justify-between p-4 border-b border-gray-200 aptiquiz-gradient rounded-t-xl">
+            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-2xl font-bold text-blue-600 shadow-md">
+                    AQ
+                </div>
+                <div class="text-white text-sm">
+                    <p class="text-white/80 text-xs">Powered by</p>
+                    <p class="font-bold text-lg">AptiQuiz Smart Engine</p>
+                </div>
+            </div>
+            <div class="text-white text-right">
+                <p class="text-sm opacity-90">Your personalized test experience</p>
+                <p id="testInfo" class="text-xs opacity-75">Loading test information...</p>
+            </div>
+        </header>
 
+        <!-- Main Content Area -->
+        <div class="flex flex-1 flex-col lg:flex-row">
+            <!-- Left: Question Section -->
+            <main class="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-gray-200">
+                <div id="questionDisplay">
+                    <div class="text-center py-12">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p class="mt-4 text-gray-500">Loading your test...</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation Buttons -->
+                <div class="mt-8 flex flex-wrap justify-center gap-3">
+                    <button id="saveNextBtn" class="px-4 py-2 rounded-md text-white font-medium btn-green shadow-md hover:shadow-lg transition-all duration-200">SAVE & NEXT</button>
+                    <button id="clearBtn" class="px-4 py-2 rounded-md text-white font-medium btn-gray shadow-md hover:shadow-lg transition-all duration-200">CLEAR</button>
+                    <button id="saveMarkForReviewBtn" class="px-4 py-2 rounded-md text-white font-medium btn-orange shadow-md hover:shadow-lg transition-all duration-200">SAVE & MARK FOR REVIEW</button>
+                    <button id="markForReviewNextBtn" class="px-4 py-2 rounded-md text-white font-medium btn-indigo shadow-md hover:shadow-lg transition-all duration-200">MARK FOR REVIEW & NEXT</button>
+                </div>
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="flex gap-2">
+                        <button id="backBtn" class="px-4 py-2 rounded-md text-gray-700 bg-gray-200 font-medium shadow-md hover:bg-gray-300 transition-all duration-200">&lt;&lt; BACK</button>
+                        <button id="nextBtn" class="px-4 py-2 rounded-md text-gray-700 bg-gray-200 font-medium shadow-md hover:bg-gray-300 transition-all duration-200">NEXT &gt;&gt;</button>
+                    </div>
+                    <button id="submitBtn" class="px-6 py-3 rounded-md text-white font-bold btn-green shadow-lg hover:shadow-xl transition-all duration-200">SUBMIT TEST</button>
+                </div>
+            </main>
+
+            <!-- Right: Question Palette -->
+            <aside class="w-full lg:w-80 p-6 bg-gray-50">
+                <div class="text-center mb-4">
+                    <div class="text-4xl font-bold text-blue-600" id="timerDisplay">--:--:--</div>
+                    <p class="text-sm text-gray-500 mt-1">Remaining Time</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 rounded status-not-visited"></div><span>Not Visited</span></div>
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 rounded status-not-answered"></div><span>Not Answered</span></div>
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 rounded status-answered"></div><span>Answered</span></div>
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 rounded status-marked-for-review"></div><span>Marked</span></div>
+                </div>
+                
+                <div id="questionPalette" class="grid grid-cols-5 gap-2 scrollable-palette max-h-96 overflow-y-auto p-2">
+                    <!-- Question buttons will be loaded here -->
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let sessionId = null;
+        let questions = [];
+        let userAnswers = {};
+        let userStatus = {};
+        let currentQuestionIndex = 0;
+        let timerInterval = null;
+        let timeRemaining = 7200; // 2 hours default
+        let examName = "";
+        let subjectName = "";
+        let userName = "";
+
+        // Get session ID from URL
+        function getSessionId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('session');
+        }
+
+        // Fetch test data from API
+        async function loadTestData() {
+            sessionId = getSessionId();
+            if (!sessionId) {
+                showError("No session ID provided. Please use the link from your email.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://192.168.1.5:8082/api/test-session/${sessionId}`);
+                if (!response.ok) throw new Error('Session not found');
+                
+                const data = await response.json();
+                questions = data.questions || [];
+                examName = data.exam || 'AptiQuiz Test';
+                subjectName = data.subject || 'General';
+                userName = data.user_name || 'Candidate';
+                
+                // Initialize user answers and status
+                questions.forEach((q, idx) => {
+                    userAnswers[q.id] = null;
+                    userStatus[q.id] = 'not-visited';
+                });
+                
+                // Update header with actual data
+                updateHeader();
+                
+                // Start timer (assuming 2 hours from creation or based on question count)
+                const defaultTime = Math.max(questions.length * 2 * 60, 3600); // min 1 hour, max based on questions
+                timeRemaining = defaultTime;
+                startTimer();
+                
+                // Render first question
+                renderCurrentQuestion();
+                
+                // Build question palette
+                buildQuestionPalette();
+                
+                // Mark first question as visited
+                if (questions.length > 0) {
+                    userStatus[questions[0].id] = 'not-answered';
+                    updateQuestionPaletteButton(0);
+                }
+                
+            } catch (error) {
+                console.error('Error loading test:', error);
+                showError('Unable to load test. The link may be expired or invalid.');
+            }
+        }
+
+        function updateHeader() {
+            document.getElementById('testInfo').innerHTML = `${examName} • ${subjectName}<br>Candidate: ${userName}`;
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitTest();
+                } else {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timeRemaining / 3600);
+            const minutes = Math.floor((timeRemaining % 3600) / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timerDisplay').textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        }
+
+        function renderCurrentQuestion() {
+            if (!questions.length) return;
+            const q = questions[currentQuestionIndex];
+            const savedAnswer = userAnswers[q.id];
+            
+            const optionsHtml = q.options.map((opt, idx) => `
+                <label class="flex items-center p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-all">
+                    <input type="radio" name="question" value="${opt}" class="w-4 h-4 text-blue-600" ${savedAnswer === opt ? 'checked' : ''}>
+                    <span class="ml-3 text-gray-700">${String.fromCharCode(65+idx)}. ${opt}</span>
+                </label>
+            `).join('');
+            
+            const html = `
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm text-gray-500">Question ${currentQuestionIndex + 1} of ${questions.length}</span>
+                        <span class="text-xs px-2 py-1 rounded-full ${getDifficultyColor(q.difficulty)}">${q.difficulty || 'Medium'}</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">${q.text}</h3>
+                    </div>
+                    <div class="space-y-3">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('questionDisplay').innerHTML = html;
+            
+            // Add event listener to radio buttons
+            document.querySelectorAll('input[name="question"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    saveAnswer(q.id, e.target.value);
+                });
+            });
+        }
+
+        function getDifficultyColor(difficulty) {
+            switch(difficulty) {
+                case 'Easy': return 'bg-green-100 text-green-800';
+                case 'Hard': return 'bg-red-100 text-red-800';
+                default: return 'bg-yellow-100 text-yellow-800';
+            }
+        }
+
+        function saveAnswer(questionId, answer) {
+            userAnswers[questionId] = answer;
+            if (userStatus[questionId] !== 'marked-for-review') {
+                userStatus[questionId] = 'answered';
+            }
+            updateQuestionPaletteButton(currentQuestionIndex);
+        }
+
+        function buildQuestionPalette() {
+            const palette = document.getElementById('questionPalette');
+            palette.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.textContent = (idx + 1).toString().padStart(2, '0');
+                btn.className = `w-full py-2 rounded-md text-sm font-medium transition-all status-${userStatus[q.id] === 'not-visited' ? 'not-visited' : (userStatus[q.id] === 'answered' ? 'answered' : (userStatus[q.id] === 'marked-for-review' ? 'marked-for-review' : 'not-answered'))}`;
+                btn.onclick = () => navigateToQuestion(idx);
+                palette.appendChild(btn);
+            });
+        }
+
+        function updateQuestionPaletteButton(idx) {
+            const palette = document.getElementById('questionPalette');
+            if (palette && palette.children[idx]) {
+                const q = questions[idx];
+                palette.children[idx].className = `w-full py-2 rounded-md text-sm font-medium transition-all status-${userStatus[q.id] === 'not-visited' ? 'not-visited' : (userStatus[q.id] === 'answered' ? 'answered' : (userStatus[q.id] === 'marked-for-review' ? 'marked-for-review' : 'not-answered'))}`;
+            }
+        }
+
+        function navigateToQuestion(idx) {
+            // Mark current question as not-answered if no answer and not marked
+            const currentQ = questions[currentQuestionIndex];
+            if (userAnswers[currentQ.id] === null && userStatus[currentQ.id] !== 'marked-for-review') {
+                userStatus[currentQ.id] = 'not-answered';
+                updateQuestionPaletteButton(currentQuestionIndex);
+            }
+            
+            currentQuestionIndex = idx;
+            renderCurrentQuestion();
+            
+            // Mark as not-answered when visited
+            const newQ = questions[currentQuestionIndex];
+            if (userStatus[newQ.id] === 'not-visited') {
+                userStatus[newQ.id] = 'not-answered';
+                updateQuestionPaletteButton(currentQuestionIndex);
+            }
+        }
+
+        function saveAndNext() {
+            const currentQ = questions[currentQuestionIndex];
+            const selectedRadio = document.querySelector('input[name="question"]:checked');
+            if (selectedRadio) {
+                saveAnswer(currentQ.id, selectedRadio.value);
+                userStatus[currentQ.id] = 'answered';
+            } else if (userStatus[currentQ.id] !== 'marked-for-review') {
+                userStatus[currentQ.id] = 'not-answered';
+            }
+            updateQuestionPaletteButton(currentQuestionIndex);
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                navigateToQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function markForReviewAndNext() {
+            const currentQ = questions[currentQuestionIndex];
+            userStatus[currentQ.id] = 'marked-for-review';
+            updateQuestionPaletteButton(currentQuestionIndex);
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                navigateToQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function clearAnswer() {
+            const currentQ = questions[currentQuestionIndex];
+            userAnswers[currentQ.id] = null;
+            userStatus[currentQ.id] = 'not-answered';
+            renderCurrentQuestion();
+            updateQuestionPaletteButton(currentQuestionIndex);
+        }
+
+        async function submitTest() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // Prepare submission data
+            const submission = {
+                session_id: sessionId,
+                user_name: userName,
+                exam_name: examName,
+                answers: userAnswers,
+                status: userStatus,
+                time_taken: 7200 - timeRemaining
+            };
+            
+            const result = confirm('Are you sure you want to submit your test?');
+            if (!result) {
+                startTimer();
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://192.168.1.5:8082/api/submit-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submission)
+                });
+                
+                const data = await response.json();
+                showResult(data);
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Error submitting test. Please contact support.');
+            }
+        }
+
+        function showResult(data) {
+            const total = questions.length;
+            const correct = data.correct || 0;
+            const percentage = (correct / total) * 100;
+            
+            document.getElementById('questionDisplay').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Test Submitted Successfully!</h2>
+                    <div class="bg-gray-50 rounded-lg p-6 inline-block">
+                        <p class="text-lg">Your Score: <span class="font-bold text-blue-600">${correct}/${total}</span></p>
+                        <p class="text-lg">Percentage: <span class="font-bold text-green-600">${percentage.toFixed(1)}%</span></p>
+                    </div>
+                    <p class="mt-6 text-gray-500">Your results have been saved. You will receive an email with detailed analysis shortly.</p>
+                    <button onclick="window.location.href='/' class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Return to Home</button>
+                </div>
+            `;
+            
+            // Disable palette and buttons
+            document.getElementById('questionPalette').style.display = 'none';
+            document.querySelectorAll('.btn-green, .btn-gray, .btn-orange, .btn-indigo').forEach(btn => btn.disabled = true);
+        }
+
+        function showError(msg) {
+            document.getElementById('questionDisplay').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <h2 class="text-xl font-bold text-red-600 mb-4">Error</h2>
+                    <p class="text-gray-600">${msg}</p>
+                    <button onclick="window.location.href='/'" class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Return to Home</button>
+                </div>
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTestData();
+            
+            // Setup button event listeners
+            document.getElementById('saveNextBtn').addEventListener('click', saveAndNext);
+            document.getElementById('markForReviewNextBtn').addEventListener('click', markForReviewAndNext);
+            document.getElementById('clearBtn').addEventListener('click', clearAnswer);
+            document.getElementById('submitBtn').addEventListener('click', submitTest);
+            document.getElementById('backBtn').addEventListener('click', () => {
+                if (currentQuestionIndex > 0) navigateToQuestion(currentQuestionIndex - 1);
+            });
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentQuestionIndex < questions.length - 1) navigateToQuestion(currentQuestionIndex + 1);
+            });
+        });
+    </script>
+</body>
+</html>
